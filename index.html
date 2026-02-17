@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Lost & Found · Python Flask Version</title>
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header with role tabs -->
+        <div class="role-header">
+            <div class="logo-area">
+                <h1>
+                    <i class="fas fa-search" style="color: #2a5298; margin-right: 8px;"></i>
+                    FindIt · Campus Lost & Found
+                </h1>
+            </div>
+            
+            <div class="role-tabs" id="roleTabs">
+                <button class="role-btn active" data-role="all">
+                    <i class="fas fa-users"></i> All
+                </button>
+                <button class="role-btn" data-role="student">
+                    <i class="fas fa-user-graduate"></i> Students
+                </button>
+                <button class="role-btn" data-role="teacher">
+                    <i class="fas fa-chalkboard-teacher"></i> Teachers
+                </button>
+                <button class="role-btn" data-role="staff">
+                    <i class="fas fa-briefcase"></i> Staff
+                </button>
+            </div>
+            
+            <div class="report-badge" onclick="location.reload()">
+                <i class="fas fa-sync-alt"></i> Refresh Feed
+            </div>
+        </div>
+
+        <!-- Stats cards - dynamically updated -->
+        <div class="stat-grid" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+                <div class="stat-content">
+                    <h3 id="activeCount">0</h3>
+                    <p>Active Items</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                <div class="stat-content">
+                    <h3 id="returnedCount">0</h3>
+                    <p>Returned Items</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+                <div class="stat-content">
+                    <h3 id="booksCount">0</h3>
+                    <p>Books / Supplies</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-mobile-alt"></i></div>
+                <div class="stat-content">
+                    <h3 id="electronicsCount">0</h3>
+                    <p>Electronics</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search bar -->
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search items by name, description, or location...">
+                <button onclick="searchItems()">Search</button>
+            </div>
+        </div>
+
+        <!-- Type filter tabs -->
+        <div class="type-filter">
+            <button class="type-filter-btn active" data-type="all">All Items</button>
+            <button class="type-filter-btn" data-type="lost">Lost Only</button>
+            <button class="type-filter-btn" data-type="found">Found Only</button>
+        </div>
+
+        <!-- Main grid: form + feed -->
+        <div class="dashboard-grid">
+            <!-- Report form -->
+            <div class="report-card">
+                <h2><i class="fas fa-pen-alt"></i> Report an Item</h2>
+                <div class="subtitle">Students · Teachers · Staff — Report lost or found items</div>
+
+                <form id="reportForm">
+                    <div class="form-group">
+                        <label><i class="far fa-user-circle"></i> Your Role</label>
+                        <select id="reporterRole" required>
+                            <option value="student">Student</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="staff">Staff</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Report Type</label>
+                        <div class="type-options" id="lostFoundToggle">
+                            <label class="type-option selected" id="lostOption">
+                                <input type="radio" name="lostFound" value="lost" checked> 
+                                <i class="fas fa-frown"></i> Lost
+                            </label>
+                            <label class="type-option" id="foundOption">
+                                <input type="radio" name="lostFound" value="found"> 
+                                <i class="fas fa-smile"></i> Found
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Item Name / Tool</label>
+                        <input type="text" id="itemName" placeholder="e.g., HP Calculator, Blue Folder, Keys..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-align-left"></i> Detailed Description</label>
+                        <textarea id="itemDesc" placeholder="Color, features, identifying marks..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-map-pin"></i> Location</label>
+                        <input type="text" id="itemPlace" placeholder="Where was it lost/found?">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-phone-alt"></i> Contact Info (optional)</label>
+                        <input type="text" id="contactInfo" placeholder="Email or phone for contact">
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-plus-circle"></i> Post Report
+                    </button>
+                </form>
+            </div>
+
+            <!-- Items feed -->
+            <div class="items-wall">
+                <div class="wall-header">
+                    <h3><i class="fas fa-stream"></i> Latest Items</h3>
+                    <span><i class="far fa-clock"></i> Live from Database</span>
+                </div>
+
+                <div id="itemContainer" class="item-grid">
+                    <!-- Items will be loaded here via JavaScript -->
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> Loading items...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-note">
+            <i class="fas fa-school"></i> 
+            Students, teachers, and staff working together · Python Flask Backend · Data persists in SQLite
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
