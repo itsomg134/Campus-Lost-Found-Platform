@@ -1,4 +1,4 @@
-# Campus Lost & Found Platform - Python Flask Version 🐍
+# Campus Lost & Found Platform - Python Flask Version
 
 A comprehensive web application built with Python Flask for students, teachers, and staff to report and find lost items within a school campus. Features a full backend with SQLite database, RESTful API, and responsive frontend.
 
